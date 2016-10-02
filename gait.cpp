@@ -38,7 +38,7 @@ int BASELINE_GYRO_Y = 0;
 //     5.     Heel Strike Detected!
 //     2. gyro.y reaches local max with positive value (disable: Heel Strike Detect)
 
-// Determine if gyo.y is 
+// Determine if gyo.y is increasing over last 5 data points
 bool isGyroYIncreasing(list<SensorPoint*>* points) {
 	int num = 5;
 	double sum = 0;
@@ -54,18 +54,18 @@ bool isGyroYIncreasing(list<SensorPoint*>* points) {
 		sum += diff;
 	}
 	double avg = sum / num;
-	cout << "Avg: " << avg << endl;
+	if (DEBUG) cout << "isGyroYIncreasing Avg: " << avg << endl;
 	if (avg > 0) return true;
 	else return false;
 }
 
+
 int main(int argc, char* argv[]){
-	cout << "Welcome to Gait Cycle Tracker!" << endl;
+	cout << "Welcome to Gait Cycle Tracker..." << endl;
 	int heelStrikesDetected = 0;
 	string line;
 
 	list<SensorPoint*> * points = new list<SensorPoint*>();
-	bool midStride = true;
 	//Local Minimums
 	SensorPoint* lmAccelX;
 	SensorPoint* lmAccelZ;
@@ -76,9 +76,9 @@ int main(int argc, char* argv[]){
 
 	// Expect Two Header lines
   getline(cin,line);
-  cout << "HEADER1: " << line << endl;
+  if (DEBUG) cout << "HEADER1: " << line << endl;
   getline(cin,line);
-  cout << "HEADER2: " << line << endl;
+  if (DEBUG) cout << "HEADER2: " << line << endl;
 
 
 	while ( std::getline(cin, line) ) {

@@ -29,5 +29,5 @@ SensorPoint::SensorPoint(string data) {
       }
     }
   }
-  cout << "Point(time:" << timestamp << " accelX:" << accelX << " accelZ:" << accelZ << " gyroY:" << gyroY << ")" << endl;
+  //cout << "Point(time:" << timestamp << " accelX:" << accelX << " accelZ:" << accelZ << " gyroY:" << gyroY << ")" << endl;
 }
