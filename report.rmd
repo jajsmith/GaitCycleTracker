@@ -2,7 +2,7 @@
 title: "Analysis of Walk Cycle Start"
 author: "Jonathan Smith"
 date: "10/2/2016"
-output: word_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -58,6 +58,7 @@ ggplot(data=df,
 ```
 
 And the analysis of the program on the second set of data (walkData2.csv) has two false detections at 3970ms and 5150ms. This is addressed in the Sources of Error section.
+
 ```{r walkData2, echo=FALSE, fig.width=6, fig.height=4}
 data_1 <- read.csv("/Users/jonathansmith/source/GaitCycleTracker/Datasets/walkData2clean.csv")
 timestamp_ms <- data_1[[2]]
