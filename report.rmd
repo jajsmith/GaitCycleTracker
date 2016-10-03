@@ -1,0 +1,97 @@
+---
+title: "Analysis of Walk Cycle Start"
+author: "Jonathan Smith"
+date: "10/2/2016"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("reshape2")
+library("ggplot2")
+```
+
+## Abstract
+
+The provided code analyzes a data from a motion sensor attached to a foot to determine when the foot starts a walk cycle. The beginning of a walk cycle is considered to be when the heel strikes the ground. The sensor gathers data with 6 degrees of freedom: acceleration in 3 directions and gyroscopic motion in 3 directions.
+
+## Analysis of Heel Strikes
+
+Heel strike occurs when the foot changes its ankle rotation and vertical movement while forward movement becomes nonexistent. From this we can reduce the amount of data we have to process by only using the relevant sensors. The motion of the foot in the given problem is equivalent to the rotation around the y-axis becoming positive from negative while the foot deaccelerates in both the vertical and horizontal directions (x-axis and z-axis in this case). The rotation changes first as the foot is approaching the ground and thus serves as the trigger to start searching for the moment of impact. After acceleration in both directions has reached a local minimum, we can be confident that the heel of the foot is impacting the ground.
+
+This is illustrated in the below graph of a single step with the point of heel strike detected by code highlighted (at 2257 milliseconds):
+
+```{r singlestep, echo=FALSE, fig.width=6, fig.height=2}
+data_1 <- read.csv("/Users/jonathansmith/source/GaitCycleTracker/Datasets/stepData1clean.csv")
+timestamp_ms <- data_1[[2]]
+accel_x <- data_1[[3]]
+accel_z <- data_1[[5]]
+gyro_y <- data_1[[7]]
+df <- data.frame(accel_x, accel_z, gyro_y, timestamp_ms)
+df <- melt(df, id.vars="timestamp_ms")
+ggplot(data=df, 
+       aes(x=timestamp_ms, y=value, colour=variable)) +
+  geom_line() +
+  geom_vline(xintercept = 2257)
+
+```
+
+And here is an overlay of the heel strikes detected on the full set of data (walkData1.csv):
+
+```{r walkData1, echo=FALSE, fig.width=6, fig.height=4}
+data_1 <- read.csv("/Users/jonathansmith/source/GaitCycleTracker/Datasets/walkData1clean.csv")
+timestamp_ms <- data_1[[2]]
+accel_x <- data_1[[3]]
+accel_z <- data_1[[5]]
+gyro_y <- data_1[[7]]
+df <- data.frame(accel_x, accel_z, gyro_y, timestamp_ms)
+df <- melt(df, id.vars="timestamp_ms")
+ggplot(data=df, 
+       aes(x=timestamp_ms, y=value, colour=variable)) +
+  geom_line() +
+  geom_vline(xintercept = 1077) +
+  geom_vline(xintercept = 2257) +
+  geom_vline(xintercept = 3437) +
+  geom_vline(xintercept = 4587) +
+  geom_vline(xintercept = 5687) +
+  geom_vline(xintercept = 7007)
+```
+
+And the analysis of the program on the second set of data (walkData2.csv) has two false detections at 3970ms and 5150ms. This is addressed in the Sources of Error section.
+```{r walkData2, echo=FALSE, fig.width=6, fig.height=4}
+data_1 <- read.csv("/Users/jonathansmith/source/GaitCycleTracker/Datasets/walkData2clean.csv")
+timestamp_ms <- data_1[[2]]
+accel_x <- data_1[[3]]
+accel_z <- data_1[[5]]
+gyro_y <- data_1[[7]]
+df <- data.frame(accel_x, accel_z, gyro_y, timestamp_ms)
+df <- melt(df, id.vars="timestamp_ms")
+ggplot(data=df, 
+       aes(x=timestamp_ms, y=value, colour=variable)) +
+  geom_line() +
+  geom_vline(xintercept = 899) +
+  geom_vline(xintercept = 2080) +
+  geom_vline(xintercept = 3160) +
+  geom_vline(xintercept = 3970) +
+  geom_vline(xintercept = 4280) +
+  geom_vline(xintercept = 5150) +
+  geom_vline(xintercept = 5469) +
+  geom_vline(xintercept = 6680)
+```
+
+## Future Development
+
+1. The code can be further extended to read other parts of the data into the SensorPoint class. This could be useful to determine, for example, if the subject is turning while they walk.
+
+2. In the future, once a walk cycle is detected, it's patterns could be used to help detect the next walk cycles by estimating the speed of the subject and when the next heel strike is likely to occur. This heel strike analysis could also be used to determine the subjects speed and estimate how much energy is being expended by the subject in each step given the acceleration of the foot.
+
+## Sources of Error
+
+The estimation of the time of heel strike could be further honed to account for when velocity becomes 0 (using integrals of the acceleration over time) rather than estimates using the local minimums of the acceleration. This estimation leads to false positives like the ones found in the second dataset.
+
+## Bibliography
+
+InvenSense. (2014) *MPU-6500 Product Specification Revision 1.1.*
+
+De Koster, Karsten, et al. (2016) *Gait* Retrieved from http://www.physio-pedia.com/Gait 
+
